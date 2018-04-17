@@ -23,7 +23,7 @@ y_train = np.asarray(y_train, dtype=np.int32)
 y_test = np.asarray(y_test, dtype=np.int32)
 
 # Train the model using training data
-model.train(x_train, y_train, num_epochs=1, batch_size=100)
+model.train(x_train, y_train, num_epochs=30, batch_size=100)
 
 # Evaluate the model performance on test or validation data
 print(model.evaluate(x_test, y_test))
