@@ -36,7 +36,7 @@ def network(inputs):
 model = Classifier(network, optimizer=GradientDescent(0.001))
 
 # Train the model using training data
-model.train(x_train, y_train, num_epochs=30, batch_size=100)
+model.train(x_train, y_train, epochs=30, batch_size=100)
 
 # Evaluate the model performance on test or validation data
 loss_and_metrics = model.evaluate(x_test, y_test)
@@ -137,7 +137,7 @@ def model(features, labels, mode):
 model = Model(model)
 
 # Train the model
-model.train(x_train, y_train, num_epochs=30, batch_size=100)
+model.train(x_train, y_train, epochs=30, batch_size=100)
 ```
 
 

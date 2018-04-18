@@ -1,6 +1,7 @@
 import tensorflow as tf
 
 from .models import Classifier, Regressor, Model, spec
+from .utils import dataset, cli
 
 # Optimizers
 GradientDescent = tf.train.GradientDescentOptimizer

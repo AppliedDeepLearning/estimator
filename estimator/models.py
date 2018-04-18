@@ -2,7 +2,7 @@ import shutil
 import tensorflow as tf
 
 from . import metrics as Metrics
-from .utils import call_fn, logger, to_dense
+from .utils import call_fn, logger, dataset, to_dense
 
 PREDICT = tf.estimator.ModeKeys.PREDICT
 
@@ -26,28 +26,25 @@ class Model():
     def __init__(self, model, **keywords):
         self.estimator = self._create_estimator(model_fn=model, **keywords)
 
-    def train(self, features, labels, num_epochs=30, batch_size=100, shuffle=True, **keywords):
-        input_fn = tf.estimator.inputs.numpy_input_fn(
-            x={'x': features},
-            y=labels,
-            num_epochs=num_epochs,
-            batch_size=batch_size,
-            shuffle=shuffle)
+    def train(self, x, y=None, epochs=30, batch_size=100, shuffle=True, **keywords):
+        input_fn = dataset(x=x,
+                           y=y,
+                           epochs=epochs,
+                           batch_size=batch_size,
+                           shuffle=shuffle)
         self.estimator.train(input_fn=input_fn, **keywords)
 
-    def evaluate(self, features, labels, batch_size=100, **keywords):
-        input_fn = tf.estimator.inputs.numpy_input_fn(
-            x={'x': features},
-            y=labels,
-            batch_size=batch_size,
-            shuffle=False)
+    def evaluate(self, x, y=None, batch_size=100, **keywords):
+        input_fn = dataset(x=x,
+                           y=y,
+                           batch_size=batch_size,
+                           shuffle=False)
         return self.estimator.evaluate(input_fn=input_fn, **keywords)
 
-    def predict(self, features, batch_size=100, **keywords):
-        input_fn = tf.estimator.inputs.numpy_input_fn(
-            x={'x': features},
-            batch_size=batch_size,
-            shuffle=False)
+    def predict(self, x, batch_size=100, **keywords):
+        input_fn = dataset(x=x,
+                           batch_size=batch_size,
+                           shuffle=False)
         return self.estimator.predict(input_fn=input_fn, **keywords)
 
     __call__ = predict
@@ -70,7 +67,8 @@ class Model():
     def _wrap_model_fn(self, model_fn):
 
         def fn(features, labels, mode, params, config):
-            features = features['x']
+            if list(features.keys()) == ['x']:
+                features = features['x']
             ret = call_fn(model_fn, features, labels, mode=mode, params=params, config=config)
             if not isinstance(ret, tf.estimator.EstimatorSpec):
                 if mode == PREDICT:
