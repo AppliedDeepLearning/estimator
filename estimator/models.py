@@ -2,9 +2,8 @@ import shutil
 import tensorflow as tf
 
 from . import metrics as Metrics
-from .utils import call_fn, logger, dataset, to_dense
-
-PREDICT = tf.estimator.ModeKeys.PREDICT
+from .modes import TRAIN, EVAL, PREDICT
+from .utils import call_fn, logger, dataset
 
 
 def spec(mode=None, predictions=None, loss=None, optimizer=None, metrics=None, **keywords):
@@ -21,30 +20,34 @@ def spec(mode=None, predictions=None, loss=None, optimizer=None, metrics=None, *
     return tf.estimator.EstimatorSpec(mode=mode, loss=loss, eval_metric_ops=metrics, **keywords)
 
 
-class Model():
+class Estimator():
 
     def __init__(self, model, **keywords):
+        self._hooks = self._get_hooks()
         self.estimator = self._create_estimator(model_fn=model, **keywords)
 
-    def train(self, x, y=None, epochs=30, batch_size=100, shuffle=True, **keywords):
+    def train(self, x, y=None, epochs=1, batch_size=128, shuffle=True, **keywords):
         input_fn = dataset(x=x,
                            y=y,
                            epochs=epochs,
                            batch_size=batch_size,
                            shuffle=shuffle)
+        self._update_kwargs(TRAIN, keywords)
         self.estimator.train(input_fn=input_fn, **keywords)
 
-    def evaluate(self, x, y=None, batch_size=100, **keywords):
+    def evaluate(self, x, y=None, batch_size=128, **keywords):
         input_fn = dataset(x=x,
                            y=y,
                            batch_size=batch_size,
                            shuffle=False)
+        self._update_kwargs(EVAL, keywords)
         return self.estimator.evaluate(input_fn=input_fn, **keywords)
 
-    def predict(self, x, batch_size=100, **keywords):
+    def predict(self, x, batch_size=128, **keywords):
         input_fn = dataset(x=x,
                            batch_size=batch_size,
                            shuffle=False)
+        self._update_kwargs(PREDICT, keywords)
         return self.estimator.predict(input_fn=input_fn, **keywords)
 
     __call__ = predict
@@ -79,42 +82,36 @@ class Model():
 
         return fn
 
+    def _get_hooks(self):
+        return {}
 
-def Classifier(*arguments, **keywords):
-    defaults = {
-        'metrics': ['accuracy'],
-        'loss': 'sparse_softmax_cross_entropy',
-        'predict': to_dense,
-    }
-    return create_model(defaults, *arguments, **keywords)
-
-
-def Regressor(*arguments, **keywords):
-    defaults = {
-        'loss': 'mean_squared_error',
-        'predict': lambda x: x,
-    }
-    return create_model(defaults, *arguments, **keywords)
+    def _update_kwargs(self, mode, keywords):
+        hooks = self._hooks.get(mode, []) + keywords.get('hooks', [])
+        if hooks:
+            keywords['hooks'] = hooks
 
 
-def create_model(defaults, network, optimizer, loss=None, metrics=None, predict=None, **keywords):
-    loss = defaults.get('loss') if loss is None else loss
-    metrics = defaults.get('metrics', {}) if metrics is None else metrics
-    predict = defaults.get('predict') if predict is None else predict
-    if isinstance(loss, str):
-        loss = getattr(tf.losses, loss)
+class Model(Estimator):
+
+    def __init__(self, network, loss=None, optimizer=None, metrics=None, **keywords):
+        model_fn = create_model_fn(network, loss, optimizer, metrics)
+        super(Model, self).__init__(model_fn, **keywords)
+
+
+def create_model_fn(network, loss_fn, optimizer_fn, metrics):
+    metrics = metrics or {}
+    if isinstance(loss_fn, str):
+        loss_fn = getattr(tf.losses, loss_fn)
     if isinstance(metrics, list):
         metrics = [getattr(Metrics, metric) if isinstance(metric, str) else metric for metric in metrics]
         metrics = {metric.__name__: metric for metric in metrics}
-    model_fn = create_model_fn(network, loss, optimizer, metrics, predict)
-    return Model(model_fn, **keywords)
-
-
-def create_model_fn(network, loss_fn, optimizer_fn, metrics, predict):
 
     def model_fn(features, labels, mode, params, config):
         outputs = call_fn(network, features, mode=mode, params=params, config=config)
-        predictions = predict(outputs)
+        if isinstance(outputs, tuple):
+            outputs, predictions = outputs
+        else:
+            predictions = outputs
         if mode == PREDICT:
             return predictions
 

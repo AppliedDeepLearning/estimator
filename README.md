@@ -23,20 +23,23 @@ It is recommended to use a [virtual environment].
 ## Getting Started
 
 ```py
-from estimator import Classifier, GradientDescent
+from estimator import Model, GradientDescent
 import tensorflow as tf
 
 # Define the network architecture - layers, number of units, activations etc.
 def network(inputs):
-    hidden = tf.layers.Dense(units=50, activation=tf.nn.relu)(inputs)
+    hidden = tf.layers.Dense(units=64, activation=tf.nn.relu)(inputs)
     outputs = tf.layers.Dense(units=10)(hidden)
     return outputs
 
 # Configure the learning process - loss, optimizer, evaluation metrics etc.
-model = Classifier(network, optimizer=GradientDescent(0.001))
+model = Model(network,
+              loss='sparse_softmax_cross_entropy',
+              optimizer=GradientDescent(0.001),
+              metrics=['accuracy'])
 
 # Train the model using training data
-model.train(x_train, y_train, epochs=30, batch_size=100)
+model.train(x_train, y_train, epochs=30, batch_size=128)
 
 # Evaluate the model performance on test or validation data
 loss_and_metrics = model.evaluate(x_test, y_test)
@@ -50,19 +53,11 @@ predictions = model(x)
 More configuration options are available:
 
 ```py
-model = Classifier(network,
-                   loss='sparse_softmax_cross_entropy',
-                   optimizer=GradientDescent(0.001),
-                   metrics=['accuracy'],
-                   model_dir='/tmp/my_model')
-```
-
-For regression, use `Regressor`:
-
-```py
-model = Regressor(network,
-                  loss='mean_squared_error',
-                  optimizer=GradientDescent(0.001))
+model = Model(network,
+              loss='sparse_softmax_cross_entropy',
+              optimizer=GradientDescent(0.001),
+              metrics=['accuracy'],
+              model_dir='/tmp/my_model')
 ```
 
 You can also use custom functions for loss and metrics:
@@ -74,10 +69,10 @@ def custom_loss(labels, outputs):
 def custom_metric(labels, outputs):
     pass
 
-model = Classifier(network,
-                   loss=custom_loss,
-                   optimizer=GradientDescent(0.001),
-                   metrics=['accuracy', custom_metric])
+model = Model(network,
+              loss=custom_loss,
+              optimizer=GradientDescent(0.001),
+              metrics=['accuracy', custom_metric])
 ```
 
 ### Example: CNN MNIST Classifier
@@ -85,7 +80,7 @@ model = Classifier(network,
 This example is based on the [MNIST example] of TensorFlow:
 
 ```py
-from estimator import Classifier, GradientDescent, TRAIN
+from estimator import Model, GradientDescent, TRAIN
 import tensorflow as tf
 
 def network(x, mode):
@@ -101,24 +96,24 @@ def network(x, mode):
     return x
 
 # Configure the learning process
-model = Classifier(network,
-                   loss='sparse_softmax_cross_entropy',
-                   optimizer=GradientDescent(0.001))
+model = Model(network,
+              loss='sparse_softmax_cross_entropy',
+              optimizer=GradientDescent(0.001))
 ```
 
 `mode` parameter specifies whether the model is used for training, evaluation or prediction.
 
 ### Model Function
 
-To have more control, you may configure the model inside a function:
+To have more control, you may configure the model inside a function using `Estimator` class:
 
 ```py
-from estimator import Model, PREDICT
+from estimator import Estimator, PREDICT
 import tensorflow as tf
 
 def model(features, labels, mode):
     # Define the network architecture
-    hidden = tf.layers.Dense(units=50, activation=tf.nn.relu)(features)
+    hidden = tf.layers.Dense(units=64, activation=tf.nn.relu)(features)
     outputs = tf.layers.Dense(units=10)(hidden)
     predictions = tf.argmax(outputs, axis=1)
     # In prediction mode, simply return predictions without configuring learning process
@@ -134,10 +129,10 @@ def model(features, labels, mode):
                 metrics={'accuracy': accuracy})
 
 # Create the model using model function
-model = Model(model)
+model = Estimator(model)
 
 # Train the model
-model.train(x_train, y_train, epochs=30, batch_size=100)
+model.train(x_train, y_train, epochs=30, batch_size=128)
 ```
 
 

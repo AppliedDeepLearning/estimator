@@ -1,10 +1,10 @@
-from estimator import Classifier, GradientDescent, TRAIN, cli
+from estimator import Model, GradientDescent, TRAIN, cli
 import numpy as np
 import tensorflow as tf
 
 args = cli(learning_rate=0.001,
            epochs=30,
-           batch_size=100,
+           batch_size=128,
            model_dir=None)
 
 
@@ -22,10 +22,11 @@ def network(x, mode):
     return x
 
 # Configure the model parameters
-model = Classifier(network,
-                   loss='sparse_softmax_cross_entropy',
-                   optimizer=GradientDescent(args.learning_rate),
-                   model_dir=args.model_dir)
+model = Model(network,
+              loss='sparse_softmax_cross_entropy',
+              optimizer=GradientDescent(args.learning_rate),
+              metrics=['accuracy'],
+              model_dir=args.model_dir)
 
 # Prepare data
 (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
