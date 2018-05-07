@@ -13,7 +13,7 @@ setup(
     long_description_content_type='text/markdown',
     author='Ravindra Marella',
     author_email='mv.ravindra007@gmail.com',
-    url='https://marella.github.io/{}/'.format(name),
+    url='https://github.com/AppliedDeepLearning/{}'.format(name),
     license='MIT',
     packages=[name],
     install_requires=['tensorflow'],
