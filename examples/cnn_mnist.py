@@ -1,4 +1,4 @@
-from estimator import Model, GradientDescent, TRAIN, cli
+from estimator import Model, TRAIN, cli
 import numpy as np
 import tensorflow as tf
 
@@ -24,7 +24,7 @@ def network(x, mode):
 # Configure the model parameters
 model = Model(network,
               loss='sparse_softmax_cross_entropy',
-              optimizer=GradientDescent(args.learning_rate),
+              optimizer=('GradientDescent', args.learning_rate),
               metrics=['accuracy'],
               model_dir=args.model_dir)
 

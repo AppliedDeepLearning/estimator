@@ -1,4 +1,4 @@
-from estimator import Model, GradientDescent, cli
+from estimator import Model, cli
 import numpy as np
 import tensorflow as tf
 
@@ -11,14 +11,15 @@ args = cli(learning_rate=0.001,
 # Define the network architecture
 def network(x, mode):
     x = tf.layers.Flatten()(x)
-    x = tf.layers.Dense(units=50, activation=tf.nn.relu)(x)
+    x = tf.layers.Dense(units=64, activation=tf.nn.relu)(x)
+    x = tf.layers.Dense(units=32, activation=tf.nn.relu)(x)
     x = tf.layers.Dense(units=10)(x)
     return x
 
 # Configure the model parameters
 model = Model(network,
               loss='sparse_softmax_cross_entropy',
-              optimizer=GradientDescent(args.learning_rate),
+              optimizer=('GradientDescent', args.learning_rate),
               metrics=['accuracy'],
               model_dir=args.model_dir)
 

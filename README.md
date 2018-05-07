@@ -23,7 +23,7 @@ It is recommended to use a [virtual environment].
 ## Getting Started
 
 ```py
-from estimator import Model, GradientDescent
+from estimator import Model
 import tensorflow as tf
 
 # Define the network architecture - layers, number of units, activations etc.
@@ -35,7 +35,7 @@ def network(inputs):
 # Configure the learning process - loss, optimizer, evaluation metrics etc.
 model = Model(network,
               loss='sparse_softmax_cross_entropy',
-              optimizer=GradientDescent(0.001),
+              optimizer=('GradientDescent', 0.001),
               metrics=['accuracy'])
 
 # Train the model using training data
@@ -55,7 +55,7 @@ More configuration options are available:
 ```py
 model = Model(network,
               loss='sparse_softmax_cross_entropy',
-              optimizer=GradientDescent(0.001),
+              optimizer=optimizer('GradientDescent', 0.001),
               metrics=['accuracy'],
               model_dir='/tmp/my_model')
 ```
@@ -71,7 +71,7 @@ def custom_metric(labels, outputs):
 
 model = Model(network,
               loss=custom_loss,
-              optimizer=GradientDescent(0.001),
+              optimizer=('GradientDescent', 0.001),
               metrics=['accuracy', custom_metric])
 ```
 
@@ -98,7 +98,7 @@ def network(x, mode):
 # Configure the learning process
 model = Model(network,
               loss='sparse_softmax_cross_entropy',
-              optimizer=GradientDescent(0.001))
+              optimizer=('GradientDescent', 0.001))
 ```
 
 `mode` parameter specifies whether the model is used for training, evaluation or prediction.

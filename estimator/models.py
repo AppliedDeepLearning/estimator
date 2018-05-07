@@ -3,6 +3,7 @@ import tensorflow as tf
 
 from . import metrics as Metrics
 from .modes import TRAIN, EVAL, PREDICT
+from .training import optimizer as create_optimizer
 from .utils import call_fn, logger, dataset
 
 
@@ -14,7 +15,7 @@ def spec(mode=None, predictions=None, loss=None, optimizer=None, metrics=None, *
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions, **keywords)
 
     if mode == tf.estimator.ModeKeys.TRAIN:
-        train_op = optimizer.minimize(loss=loss, global_step=tf.train.get_global_step())
+        train_op = create_train_op(optimizer, loss)
         return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op, **keywords)
 
     return tf.estimator.EstimatorSpec(mode=mode, loss=loss, eval_metric_ops=metrics, **keywords)
@@ -98,7 +99,7 @@ class Model(Estimator):
         super(Model, self).__init__(model_fn, **keywords)
 
 
-def create_model_fn(network, loss_fn, optimizer_fn, metrics):
+def create_model_fn(network, loss_fn, optimizer, metrics):
     metrics = metrics or {}
     if isinstance(loss_fn, str):
         loss_fn = getattr(tf.losses, loss_fn)
@@ -116,7 +117,6 @@ def create_model_fn(network, loss_fn, optimizer_fn, metrics):
             return predictions
 
         loss = loss_fn(labels, outputs)
-        optimizer = create_optimizer(optimizer_fn)
         eval_metric_ops = {name: metric(labels, outputs) for name, metric in metrics.items()}
         return dict(loss=loss,
                     optimizer=optimizer,
@@ -125,9 +125,10 @@ def create_model_fn(network, loss_fn, optimizer_fn, metrics):
     return model_fn
 
 
-def create_optimizer(optimizer):
-    if isinstance(optimizer, tf.train.Optimizer):
-        return optimizer
-    if callable(optimizer):
-        return optimizer()
-    return optimizer
+def create_train_op(optimizer, loss):
+    global_step = tf.train.get_global_step()
+    if isinstance(optimizer, tuple):
+        optimizer = create_optimizer(*optimizer)
+    if not isinstance(optimizer, tf.train.Optimizer) and callable(optimizer):
+        return call_fn(optimizer, loss, global_step=global_step)
+    return optimizer.minimize(loss=loss, global_step=global_step)

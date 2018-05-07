@@ -1,4 +1,5 @@
 import argparse
+import inspect
 import logging
 import numpy as np
 import tensorflow as tf
@@ -34,13 +35,13 @@ def to_dense(x):
     return tf.argmax(x, axis=1) if len(x.shape) > 1 and x.shape[1] > 1 else x
 
 
-def call_fn(fn, *arguments, **keywords):
-    fn_keywords = fn.__code__.co_varnames
+def call_fn(fn, *args, **keywords):
+    sig = inspect.signature(fn)
     kwargs = {}
     for keyword, value in keywords.items():
-        if keyword in fn_keywords:
+        if keyword in sig.parameters:
             kwargs[keyword] = value
-    return fn(*arguments, **kwargs)
+    return fn(*args, **kwargs)
 
 
 def cli(**keywords):
