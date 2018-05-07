@@ -7,7 +7,7 @@ name = 'estimator'
 
 setup(
     name=name,
-    version='0.0.4',
+    version='0.0.5',
     description=long_description.splitlines()[0],
     long_description=long_description,
     long_description_content_type='text/markdown',
