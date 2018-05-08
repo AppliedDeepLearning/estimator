@@ -16,7 +16,7 @@ setup(
     url='https://github.com/AppliedDeepLearning/{}'.format(name),
     license='MIT',
     packages=[name],
-    install_requires=['tensorflow'],
+    install_requires=[],
     zip_safe=False,
     classifiers=[
         'Development Status :: 1 - Planning',

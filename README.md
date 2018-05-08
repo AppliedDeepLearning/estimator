@@ -13,6 +13,14 @@ A framework for quickly creating machine learning models using Estimator API of 
 
 ## Installation
 
+[Install TensorFlow]:
+
+```sh
+pip install tensorflow
+```
+
+and run:
+
 ```sh
 pip install estimator
 ```
@@ -144,3 +152,4 @@ model.train(x_train, y_train, epochs=30, batch_size=128)
 [license]: /LICENSE
 [virtual environment]: https://docs.python.org/3/library/venv.html
 [MNIST example]: https://www.tensorflow.org/tutorials/layers#building_the_cnn_mnist_classifier
+[Install TensorFlow]: https://www.tensorflow.org/install/
