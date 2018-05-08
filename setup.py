@@ -7,7 +7,7 @@ name = 'estimator'
 
 setup(
     name=name,
-    version='0.0.5',
+    version='0.0.6',
     description=long_description.splitlines()[0],
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -37,5 +37,5 @@ setup(
         'Topic :: Software Development :: Libraries',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
-    keywords='{} tensorflow neural networks deep learning machine learning artificial intelligence ml ai'.format(name),
+    keywords='{} tensorflow neural-network deep-learning machine-learning'.format(name),
 )
