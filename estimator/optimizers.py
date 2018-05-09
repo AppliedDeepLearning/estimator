@@ -1,12 +1,12 @@
 import tensorflow as tf
 
-GradientDescent = tf.train.GradientDescentOptimizer
-Adadelta = tf.train.AdadeltaOptimizer
-Adagrad = tf.train.AdagradOptimizer
-AdagradDA = tf.train.AdagradDAOptimizer
-Momentum = tf.train.MomentumOptimizer
-Adam = tf.train.AdamOptimizer
-Ftrl = tf.train.FtrlOptimizer
-ProximalGradientDescent = tf.train.ProximalGradientDescentOptimizer
-ProximalAdagrad = tf.train.ProximalAdagradOptimizer
-RMSProp = tf.train.RMSPropOptimizer
+gradientdescent = GradientDescent = tf.train.GradientDescentOptimizer
+adadelta = Adadelta = tf.train.AdadeltaOptimizer
+adagrad = Adagrad = tf.train.AdagradOptimizer
+adagradda = AdagradDA = tf.train.AdagradDAOptimizer
+momentum = Momentum = tf.train.MomentumOptimizer
+adam = Adam = tf.train.AdamOptimizer
+ftrl = Ftrl = tf.train.FtrlOptimizer
+proximalgradientdescent = ProximalGradientDescent = tf.train.ProximalGradientDescentOptimizer
+proximaladagrad = ProximalAdagrad = tf.train.ProximalAdagradOptimizer
+rmsprop = RMSProp = tf.train.RMSPropOptimizer
