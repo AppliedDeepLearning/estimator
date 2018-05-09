@@ -1,6 +1,7 @@
 import shutil
 import tensorflow as tf
 
+from . import losses
 from . import metrics as Metrics
 from .modes import TRAIN, EVAL, PREDICT
 from .training import optimizer as create_optimizer
@@ -102,7 +103,7 @@ class Model(Estimator):
 def create_model_fn(network, loss_fn, optimizer, metrics):
     metrics = metrics or {}
     if isinstance(loss_fn, str):
-        loss_fn = getattr(tf.losses, loss_fn)
+        loss_fn = getattr(losses, loss_fn)
     if isinstance(metrics, list):
         metrics = [getattr(Metrics, metric) if isinstance(metric, str) else metric for metric in metrics]
         metrics = {metric.__name__: metric for metric in metrics}
