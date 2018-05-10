@@ -24,8 +24,10 @@ def decay(fn_name, **kwargs):
     return wrapper
 
 
-def optimizer(class_name, learning_rate, decay=None, clip=None, **kwargs):
+def optimizer(class_name, learning_rate, *args, **kwargs):
     class_ = getattr(optimizers, class_name)
+    decay = kwargs.pop('decay', None)
+    clip = kwargs.pop('clip', None)
 
     def wrapper(loss, global_step):
         if decay is not None:
@@ -44,6 +46,6 @@ def optimizer(class_name, learning_rate, decay=None, clip=None, **kwargs):
         else:
             Optimizer = class_
 
-        return Optimizer(lr, **kwargs).minimize(loss=loss, global_step=global_step)
+        return Optimizer(lr, *args, **kwargs).minimize(loss=loss, global_step=global_step)
 
     return wrapper
