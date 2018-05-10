@@ -24,7 +24,7 @@ def decay(fn_name, **kwargs):
     return wrapper
 
 
-def optimizer(class_name, learning_rate, *args, **kwargs):
+def optimizer(class_name, learning_rate, **kwargs):
     class_ = getattr(optimizers, class_name)
     decay = kwargs.pop('decay', None)
     clip = kwargs.pop('clip', None)
@@ -46,6 +46,10 @@ def optimizer(class_name, learning_rate, *args, **kwargs):
         else:
             Optimizer = class_
 
-        return Optimizer(lr, *args, **kwargs).minimize(loss=loss, global_step=global_step)
+        # AdagradDA requies global_step as an argument
+        if class_ in [optimizers.AdagradDA] and 'global_step' not in kwargs:
+            kwargs['global_step'] = global_step
+
+        return Optimizer(lr, **kwargs).minimize(loss=loss, global_step=global_step)
 
     return wrapper
