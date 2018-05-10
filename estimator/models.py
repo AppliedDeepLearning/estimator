@@ -8,7 +8,7 @@ from .training import optimizer as create_optimizer
 from .utils import call_fn, logger, dataset
 
 
-def spec(mode=None, predictions=None, loss=None, optimizer=None, metrics=None, **keywords):
+def spec(mode=None, predictions=None, loss=None, optimizer=None, metrics=None, train_op=None, **keywords):
     if mode is None and predictions is not None:
         mode = PREDICT
 
@@ -16,7 +16,8 @@ def spec(mode=None, predictions=None, loss=None, optimizer=None, metrics=None, *
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions, **keywords)
 
     if mode == tf.estimator.ModeKeys.TRAIN:
-        train_op = create_train_op(optimizer, loss)
+        if train_op is None:
+            train_op = create_train_op(optimizer, loss)
         return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op, **keywords)
 
     return tf.estimator.EstimatorSpec(mode=mode, loss=loss, eval_metric_ops=metrics, **keywords)
@@ -127,6 +128,8 @@ def create_model_fn(network, loss_fn, optimizer, metrics):
 
 
 def create_train_op(optimizer, loss):
+    if isinstance(optimizer, tf.Operation):
+        return optimizer
     global_step = tf.train.get_global_step()
     if isinstance(optimizer, tuple):
         optimizer = create_optimizer(*optimizer)
